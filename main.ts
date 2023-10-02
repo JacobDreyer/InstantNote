@@ -1,6 +1,5 @@
 import { App, Editor, MarkdownView, Modal, Notice, Plugin, PluginSettingTab, Setting } from 'obsidian';
-
-// Remember to rename these classes and interfaces!
+import generate from "src/generate"
 
 interface InstantNoteSettings {
 	mySetting: string;
@@ -16,7 +15,7 @@ export default class InstantNotePlugin extends Plugin {
 	async onload() {
 		await this.loadSettings();
 
-		const ribbonIcon = this.addRibbonIcon('create-new', 'InstantNote', () => {
+		this.addRibbonIcon('create-new', 'InstantNote', () => {
 			new Notice('Hello World this is the InstantNote Plugin');
 		});
 
@@ -24,12 +23,46 @@ export default class InstantNotePlugin extends Plugin {
 		const statusBarItemEl = this.addStatusBarItem();
 		statusBarItemEl.setText('Instant Note Plugin Enabled');
 
-		// This adds a simple command that can be triggered anywhere
+		
 		this.addCommand({
-			id: 'open-sample-modal-simple',
-			name: 'Open sample modal (simple)',
+			id: 'text-to-page',
+			name: 'Text to Page',
+			editorCallback: async (editor: Editor, view: MarkdownView) => {
+				console.log("Reached Text To Page Command");
+				editor.setCursor(editor.lastLine());
+				try {
+					const response = await generate({
+						method: "POST",
+						headers: {
+							"Content-Type": "application/json",
+						},
+						body: JSON.stringify({input: "default"}),
+					});
+					console.log("respose: " + response);
+
+					editor.replaceSelection(response);
+				}
+				catch{
+					console.log("An Error Occurred");
+				}
+			}
+		});
+
+		this.addCommand({
+			id: 'sample-editor-command',
+			name: 'Sample editor command',
+			editorCallback: (editor: Editor, view: MarkdownView) => {
+				console.log(editor.getSelection());
+				editor.replaceSelection('Sample Editor Command');
+			}
+		});
+
+
+		this.addCommand({
+			id: 'open',
+			name: 'Open',
 			callback: () => {
-				new SampleModal(this.app).open();
+				console.log("reached");
 			}
 		});
 	}
