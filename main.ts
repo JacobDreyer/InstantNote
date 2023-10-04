@@ -37,7 +37,7 @@ export default class InstantNotePlugin extends Plugin {
 							"Content-Type": "application/json",
 						},
 						body: JSON.stringify({input: "default"}),
-					});
+					}, app.workspace.getActiveFile());
 					console.log("respose: " + response);
 
 					editor.replaceSelection(response);
